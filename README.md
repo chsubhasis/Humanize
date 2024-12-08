@@ -6,3 +6,6 @@ source venv/bin/activate
 
 2. Install the dependencies.
 pip install -r requirements.txt
+
+3. Launch the app
+python3 app.py
