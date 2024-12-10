@@ -60,11 +60,9 @@ class SAPDocumentProcessor:
                 chunk_overlap=50
             )
         
-        #print("text_splitter.split_documents(docs)", text_splitter.split_documents(docs))
-
-        mydoc.extend(text_splitter.split_documents(docs))
-        #print("mydoc", mydoc)
-        #print("mydoc[0].page_content", mydoc[0].page_content)
+        split_docs = text_splitter.split_documents(docs)
+        page_content = [doc.page_content for doc in split_docs]
+        page_content = clean_text("\n".join(page_content))
 
         extraction_prompt = """
         You are a specialist in reading SAP assessment reports in PDF or Docs. 
@@ -85,7 +83,7 @@ class SAPDocumentProcessor:
             )
 
         extracted_info = llm.invoke(
-            extraction_prompt.format(assessment_document=mydoc[0].page_content),
+            extraction_prompt.format(assessment_document=page_content),
             top_k = 30,
             temperature = 0.1,
             repetition_penalty = 1.03,
