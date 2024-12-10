@@ -14,16 +14,17 @@ class SAPBRDGenerator:
         self.temperature = temperature
         # Standard BRD Sections
         self.standard_sections = [
-            "1. Executive Summary",
-            "2. Project Scope",
-            "3. Business Requirements",
-            "4. Functional Requirements", 
-            "5. Non-Functional Requirements",
-            "6. Constraints and Assumptions",
-            "7. Stakeholder Requirements",
-            "8. High-Level Solution Architecture",
-            "9. Risk Analysis",
-            "10. Acceptance Criteria"
+            "1. Organization Overview",
+            "2. Executive Summary",
+            "3. Project Scope",
+            "4. Business Requirements",
+            "5. Functional Requirements", 
+            "6. Non-Functional Requirements",
+            "7. Constraints and Assumptions",
+            "8. Stakeholder Requirements",
+            "9. High-Level Solution Architecture",
+            "10. Risk Analysis",
+            "11. Acceptance Criteria"
         ]
         
         # Conversation context
@@ -58,12 +59,7 @@ class SAPBRDGenerator:
                 return error_message, None
 
     def create_few_shot_prompt_template(self) -> FewShotPromptTemplate:
-        """
-        Create a sophisticated few-shot prompt template for BRD generation.
-        
-        Returns:
-            FewShotPromptTemplate: Configured prompt template
-        """
+
         # Example prompt template
         example_prompt = PromptTemplate(
             input_variables=["input", "output"],

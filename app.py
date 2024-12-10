@@ -25,12 +25,16 @@ def create_brd_interface(example_assessments: List[str] = None, example_brds: Li
                 # Assessment Upload
                 assessment_input = gr.File(label="Upload Assessment Report")
                 generate_btn = gr.Button("Generate BRD")
-                
+
                 # Feedback Input
                 feedback_input = gr.Textbox(label="Refine BRD (Provide Feedback)", lines=5, interactive=True)
                 refine_btn = gr.Button("Refine BRD")
-            
+
             with gr.Column():
+
+                # Uploaded assessment summary Display
+                assessment_summary = gr.Textbox(label="Assessment Summary", lines=15, interactive=True)
+
                 # BRD Content Display
                 brd_output = gr.Textbox(label="BRD Content", lines=15, interactive=True)
                 
@@ -41,7 +45,7 @@ def create_brd_interface(example_assessments: List[str] = None, example_brds: Li
         generate_btn.click(
             generate_new_BRD, 
             inputs=assessment_input, 
-            outputs=[brd_output, brd_download]
+            outputs=[brd_output, brd_download, assessment_summary]
         )
         
         refine_btn.click(
@@ -55,16 +59,15 @@ def create_brd_interface(example_assessments: List[str] = None, example_brds: Li
 def generate_new_BRD(assessment_file):
     try:
         # Extract text from uploaded assessment file
-        assessment_text = SAPDocumentProcessor.extract_text(assessment_file.name)
-        #assessment_text = SAPDocumentProcessor.extract_text(assessment_file)
-        
+        assessment_text = SAPDocumentProcessor.extract_text_with_llm(assessment_file.name)
+
         # Generate BRD
         brd_content = brd_generator.generate_brd(assessment_text)
         
         # Save BRD
         brd_filepath = brd_generator.save_brd(brd_content)
         
-        return brd_content, gr.File(value=brd_filepath)
+        return brd_content, gr.File(value=brd_filepath), assessment_text
     
     except Exception as e:
         # Capture the full stack trace
@@ -103,6 +106,6 @@ if __name__ == "__main__":
     demo = create_brd_interface(EXAMPLE_ASSESSMENTS, EXAMPLE_BRDS)
     demo.launch(debug=False)
 
-    #generate_new_BRD("new_assessment.pdf")
+    #generate_new_BRD("processor/new_assessment.pdf")
 
 
