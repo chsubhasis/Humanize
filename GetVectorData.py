@@ -63,7 +63,7 @@ def clean_text(text: str) -> str:
 if __name__ == "__main__":
 
     assessment_document_paths = [
-    'new_assessment - Copy.pdf'
+    'new_assessment.pdf'
     ]
     
     documents = load_documents(assessment_document_paths)

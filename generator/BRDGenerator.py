@@ -59,12 +59,7 @@ class SAPBRDGenerator:
                 return error_message, None
 
     def create_few_shot_prompt_template(self) -> FewShotPromptTemplate:
-        """
-        Create a sophisticated few-shot prompt template for BRD generation.
-        
-        Returns:
-            FewShotPromptTemplate: Configured prompt template
-        """
+
         # Example prompt template
         example_prompt = PromptTemplate(
             input_variables=["input", "output"],
