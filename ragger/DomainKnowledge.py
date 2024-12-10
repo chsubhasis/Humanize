@@ -11,56 +11,41 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain_community.llms import HuggingFacePipeline
+from langchain_huggingface import HuggingFaceEndpoint
 from transformers import pipeline
-
 
 class DomainKnowledgeRAG:
     def __init__(
         self,
-        embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        #embedding_model_name: str = "mixedbread-ai/mxbai-embed-large-v1",
-        llm_model_name: str = "microsoft/Orca-2-13b",
-        #llm_model_name: str = "HuggingFaceH4/zephyr-7b-beta"
+        embedding_model_name: str = "mixedbread-ai/mxbai-embed-large-v1",
+        llm_model_name: str = "HuggingFaceH4/zephyr-7b-beta",
         device: str = "cuda" if torch.cuda.is_available() else "cpu"
     ):
-        """
-        Initialize RAG system with embedding and language models
 
-        Args:
-            embedding_model_name (str): Embedding model for semantic search
-            llm_model_name (str): Language model for generation
-            device (str): Computation device
-        """
-        self.device = device
-        
         hfapi_key = getpass("Enter you HuggingFace access token:")
         os.environ["HF_TOKEN"] = hfapi_key
         os.environ["HUGGINGFACEHUB_API_TOKEN"] = hfapi_key
         
-        encode_kwargs = {'normalize_embeddings': False}
-        
-        # Setup LLM
-        #self.tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
-        #self.model = AutoModelForCausalLM.from_pretrained(
-        #    llm_model_name,
-        #    device_map=self.device
-            #torch_dtype=torch.float16
-        #)
-
-        # Create Text Generation Pipeline
-        self.generator = pipeline(
-            "text-generation",
-            model=llm_model_name,
-            #tokenizer=self.tokenizer,
-            #max_length=2048
+        self.llm = HuggingFaceEndpoint(
+            repo_id="HuggingFaceH4/zephyr-7b-beta",
+            task="text-generation",
+            max_new_tokens = 512,
+            top_k = 30,
+            temperature = 0.1,
+            repetition_penalty = 1.03,
         )
-        self.llm = HuggingFacePipeline(pipeline=self.generator)
 
         # Vector Store
         self.vector_store = None
         
-        # Setup Embeddings
-        self.embeddings = HuggingFaceEmbeddings(embedding_model_name)
+        model_kwargs = {'device': device}      # cuda/cpu
+        encode_kwargs = {'normalize_embeddings': False}
+
+        self.embedding =  HuggingFaceEmbeddings(
+            model_name=embedding_model_name,     
+            model_kwargs=model_kwargs, 
+            encode_kwargs=encode_kwargs
+        )
 
 
     def load_documents(self, document_paths: List[str]) -> List[Dict]:
