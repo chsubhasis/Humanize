@@ -12,7 +12,8 @@ class MultiAgentBRDGenerator:
 
     def extract_key_info(self, documents):
         """
-        Agent for extracting key information from assessment reports
+        Agent for extracting key information from assessment reports.
+        You can customize and add logics to parse different assessment files.
 
         Args:
             documents (List): Assessment documents
@@ -70,39 +71,3 @@ class MultiAgentBRDGenerator:
         )
 
         return generated_brd
-
-    def validate_brd(self, generated_brd, original_docs):
-        """
-        Validation agent to cross-check BRD consistency
-
-        Args:
-            generated_brd (str): Generated BRD
-            original_docs (List): Original assessment documents
-
-        Returns:
-            Dict: Validation report
-        """
-        validation_prompt = """
-        Validate the following generated Business Requirement Document
-        against the original assessment documents. Check for:
-        1. Semantic Consistency
-        2. Domain-Specific Accuracy
-        3. Completeness of Requirements
-
-        Generated BRD: {brd}
-        Original Documents: {docs}
-
-        Validation Report:
-        """
-
-        validation_report = self.rag_system.llm(
-            validation_prompt.format(
-                brd=generated_brd,
-                docs=original_docs[0].page_content
-            )
-        )
-
-        return {
-            "is_valid": len(validation_report) > 0,
-            "report": validation_report
-        }

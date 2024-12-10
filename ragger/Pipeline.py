@@ -4,19 +4,18 @@ from DomainKnowledge import DomainKnowledgeRAG
 import os
 from MultiAgent import MultiAgentBRDGenerator
 
-
 class BRDGenerationPipeline:
     def __init__(
         self,
-        document_paths: List[str],
-        output_dir: str = 'generated_brds'
+        assessment_document_paths: List[str],
+        brd_output_dir: str = 'generated_brds'
     ):
         """
         Complete BRD Generation Pipeline
 
         Args:
-            document_paths (List[str]): Paths to assessment documents
-            output_dir (str): Directory to save generated BRDs
+            assessment_document_paths (List[str]): Paths to assessment documents
+            brd_output_dir (str): Directory to save generated BRDs
         """
         # Setup logging
         logging.basicConfig(
@@ -25,34 +24,23 @@ class BRDGenerationPipeline:
         )
 
         # Create output directory
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(brd_output_dir, exist_ok=True)
 
         # Initialize RAG System
         self.rag_system = DomainKnowledgeRAG()
 
         # Load and process documents
-        self.documents = self.rag_system.load_documents(document_paths)
+        self.documents = self.rag_system.load_documents(assessment_document_paths)
 
         # Create vector store
         self.rag_system.create_vector_store(self.documents)
 
-        # Generate synthetic data
-        self.synthetic_docs = self.rag_system.generate_synthetic_data(
-            self.documents
-        )
-
         # Initialize Multi-Agent System
         self.agent_system = MultiAgentBRDGenerator(self.rag_system)
-
-        self.output_dir = output_dir
+        self.brd_output_dir = brd_output_dir
 
     def generate_brds(self):
-        """
-        Generate BRDs for all input documents
 
-        Returns:
-            List of generated BRDs
-        """
         generated_brds = []
 
         for doc in self.documents:
@@ -69,22 +57,17 @@ class BRDGenerationPipeline:
                     [doc]
                 )
 
-                if validation_result['is_valid']:
-                    # Save BRD
-                    output_path = os.path.join(
-                        self.output_dir,
-                        f'BRD_{hash(doc.page_content)}.txt'
-                    )
+                # Save BRD
+                output_path = os.path.join(
+                    self.brd_output_dir,
+                    f'BRD_{hash(doc.page_content)}.txt'
+                )
 
-                    with open(output_path, 'w') as f:
-                        f.write(generated_brd)
+                with open(output_path, 'w') as f:
+                    f.write(generated_brd)
 
-                    generated_brds.append(generated_brd)
-                    logging.info(f"Successfully generated BRD: {output_path}")
-                else:
-                    logging.warning(
-                        "BRD validation failed. Skipping document."
-                    )
+                generated_brds.append(generated_brd)
+                logging.info(f"Successfully generated BRD: {output_path}")
 
             except Exception as e:
                 logging.error(f"Error processing document: {e}")
@@ -93,9 +76,9 @@ class BRDGenerationPipeline:
 
 
 if __name__ == "__main__":
-    document_paths = [
+    assessment_document_paths = [
     'new_assessment.pdf',
     'new_assessment - Copy.pdf'
     ]
-    brd_pipeline = BRDGenerationPipeline(document_paths)
+    brd_pipeline = BRDGenerationPipeline(assessment_document_paths)
     generated_brds = brd_pipeline.generate_brds()

@@ -41,12 +41,11 @@ class DomainKnowledgeRAG:
         model_kwargs = {'device': device}      # cuda/cpu
         encode_kwargs = {'normalize_embeddings': False}
 
-        self.embedding =  HuggingFaceEmbeddings(
+        self.embeddings =  HuggingFaceEmbeddings(
             model_name=embedding_model_name,     
             model_kwargs=model_kwargs, 
             encode_kwargs=encode_kwargs
         )
-
 
     def load_documents(self, document_paths: List[str]) -> List[Dict]:
         """
@@ -80,7 +79,6 @@ class DomainKnowledgeRAG:
 
         return documents
 
-
     def create_vector_store(self, documents):
         """
         Create vector store for semantic search
@@ -89,34 +87,3 @@ class DomainKnowledgeRAG:
             documents (List): Preprocessed document chunks
         """
         self.vector_store = FAISS.from_documents(documents, self.embeddings)
-
-
-    def generate_synthetic_data(self, existing_docs, num_synthetics: int = 5):
-        """
-        Generate synthetic training data
-
-        Args:
-            existing_docs (List): Existing documents
-            num_synthetics (int): Number of synthetic documents to generate
-
-        Returns:
-            List of synthetic documents
-        """
-        synthetic_docs = []
-
-        prompt_template = """
-        Based on the following SAP/SFDC domain context, generate a synthetic
-        business requirement document excerpt:
-
-        Context: {context}
-
-        Synthetic Document Excerpt:
-        """
-
-        for doc in existing_docs[:num_synthetics]:
-            synthetic_excerpt = self.llm(
-                prompt_template.format(context=doc.page_content)
-            )
-            synthetic_docs.append(synthetic_excerpt)
-
-        return synthetic_docs
