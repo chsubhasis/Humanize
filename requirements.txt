@@ -3,3 +3,8 @@ PyPDF2
 gradio
 mistralai
 langchain_community
+torch
+transformers
+sentence-transformers
+langchain_huggingface
+langchain_chroma
