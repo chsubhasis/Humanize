@@ -56,13 +56,16 @@ def generate_new_BRD(assessment_file):
     try:
         # Extract text from uploaded assessment file
         assessment_text = SAPDocumentProcessor.extract_text(assessment_file.name)
+        #print("assessment_text ready", assessment_text)
         #assessment_text = SAPDocumentProcessor.extract_text(assessment_file)
         
         # Generate BRD
         brd_content = brd_generator.generate_brd(assessment_text)
+        #print("brd_content ready", brd_content)
         
         # Save BRD
         brd_filepath = brd_generator.save_brd(brd_content)
+        #print("brd content saved at", brd_filepath)
         
         return brd_content, gr.File(value=brd_filepath)
     
@@ -101,7 +104,7 @@ if __name__ == "__main__":
 
     # Create interface with optional few-shot examples
     demo = create_brd_interface(EXAMPLE_ASSESSMENTS, EXAMPLE_BRDS)
-    demo.launch(debug=False)
+    demo.launch(debug=True)
 
     #generate_new_BRD("new_assessment.pdf")
 

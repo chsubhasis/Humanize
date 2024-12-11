@@ -5,7 +5,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_chroma import Chroma
 import torch
-import re, unicodedata
+import re, unicodedata, os
 
 def load_documents(document_paths: List[str]) -> List[Dict]:
     documents = []
@@ -60,8 +60,11 @@ def clean_text(text: str) -> str:
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
 
-if __name__ == "__main__":
+def is_chroma_db_present(directory: str):
+    #Check if the directory exists and contains any files.
+    return os.path.exists(directory) and len(os.listdir(directory)) > 0
 
+def getResponse(query:str) -> str:
     assessment_document_paths = [
     'new_assessment.pdf'
     ]
@@ -71,21 +74,31 @@ if __name__ == "__main__":
     embeddings = getEmbedding()
     persist_directory = 'docs/chroma/'
 
-    vectordb = Chroma.from_documents(
-        documents=splits, # splits we created earlier
-        embedding=embeddings,
-        persist_directory=persist_directory # save the directory
-        )
+    if is_chroma_db_present(persist_directory):
+        print(f"Chroma vector DB found in '{persist_directory}' and will be loaded.")
+        # Load vector store from the local directory
+        vectordb = Chroma(
+            persist_directory=persist_directory, 
+            embedding_function=getEmbedding()
+            )
+    else:
+        vectordb = Chroma.from_documents(
+            documents=splits, # splits we created earlier
+            embedding=embeddings,
+            persist_directory=persist_directory # save the directory
+            )
 
-    question_1 = "What are the objectives of Interface Assessment?"
-    docs = vectordb.search(question_1, search_type="mmr", k=5)
-    print(f"Responding to the {question_1}:")
-    
+    question = query
+    docs = vectordb.search(question, search_type="mmr", k=5)    
     response = ""
     for i in range(len(docs)):
         response = response + docs[i].page_content
 
-    print(clean_text(response))
+    return(clean_text(response))
 
-    #Similarly add as many questions as needed
-    #And include those response in few shots prompt template
+
+if __name__ == "__main__":
+    #print(getResponse("What are the objectives of Interface Assessment?"))
+    #print(getResponse("What are the key issues?"))
+
+    #We can update the prompt with the response of these questions.
