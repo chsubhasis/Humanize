@@ -8,4 +8,4 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 3. Launch the app
-python3 app.py
+python app.py
